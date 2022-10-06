@@ -1,4 +1,4 @@
-import { uniqueId } from 'lodash-es';
+import { pick, uniqueId } from 'lodash-es';
 
 import { File, FileTreeItem } from './typing';
 
@@ -26,6 +26,18 @@ export function toFileTreeItems(files: File[]): FileTreeItem[] {
       item.children = toFileTreeItems(file.children);
     }
     result.push(item);
+  });
+  return result;
+}
+
+export function toFiles(items: FileTreeItem[]): File[] {
+  const result: File[] = [];
+  items.forEach((item) => {
+    const file: File = pick(item, 'name', 'content', 'isDirectory');
+    if (item.children) {
+      file.children = toFiles(item.children);
+    }
+    result.push(file);
   });
   return result;
 }

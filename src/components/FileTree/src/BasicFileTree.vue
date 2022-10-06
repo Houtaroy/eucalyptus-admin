@@ -8,6 +8,7 @@
   import {
     newFileTreeItem,
     toFileTreeItems,
+    toFiles,
     findFileByKey,
     deleteFileByKey,
   } from './FileTreeHelper';
@@ -23,6 +24,10 @@
 
   function setFiles(files: File[]) {
     treeDataRef.value[0].children = toFileTreeItems(files);
+  }
+
+  function getFiles(): File[] {
+    return toFiles(treeDataRef.value[0].children || []);
   }
 
   const treeDataRef = ref<FileTreeItem[]>([
@@ -44,8 +49,8 @@
 
   const emit = defineEmits(['select']);
 
-  function handleSelected(keys: string[] | number[], event) {
-    emit('select', keys, event.node?.dataRef);
+  function handleSelected(_keys: string[] | number[], event) {
+    emit('select', event.node?.dataRef);
   }
 
   function handleNewFile() {
@@ -89,6 +94,7 @@
 
   defineExpose({
     setFiles,
+    getFiles,
   });
 </script>
 <template>

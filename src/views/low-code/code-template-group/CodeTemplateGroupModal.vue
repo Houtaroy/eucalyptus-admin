@@ -14,35 +14,10 @@
   import { CodeTemplateGroupEntity } from '/@/apis/code-template-group/models/CodeTemplateGroupEntity';
   import { TemplateEntity } from '/@/apis/code-template-group/models/TemplateEntity';
 
-  const isUpdate = ref(true);
-  const getTitle = computed(() => (!unref(isUpdate) ? '新增代码模板组' : '编辑代码模板组'));
-  const rowId = ref('');
-  const activeKey = ref('basic');
+  import { addCodeTemplateGroup, updateCodeTemplateGroupById } from '/@/apis/code-template-group';
 
-  const [registerModal, { setModalProps }] = useModalInner(
-    async (data: CodeTemplateGroupEntity) => {
-      setModalProps({ confirmLoading: false, defaultFullscreen: true, canFullscreen: false });
-      activeKey.value = 'basic';
-      isUpdate.value = !!data?.id;
-
-      if (unref(isUpdate)) {
-        rowId.value = data.id!;
-      }
-
-      resetFields();
-      setFieldsValue({ ...data });
-      domainConverterFormRef.value?.setSelectedRowKeys([data.domainConverterId]);
-      propertyTableRef.value?.setTableData(data.properties || []);
-      templatesFormRef.value?.setTemplates(data.templates || []);
-    },
-  );
-
-  function handleSubmit() {
-    console.log('领域转换器', domainConverterFormRef.value?.getSelectRowKeys());
-    console.log('全局参数', propertyTableRef.value?.getDataSource());
-  }
-
-  const [basicFormRegister, { setFieldsValue, resetFields }] = useCodeTemplateGroupBasicForm();
+  const [basicFormRegister, { setFieldsValue, resetFields, validate }] =
+    useCodeTemplateGroupBasicForm();
 
   const domainConverterFormRef = ref<{
     setSelectedRowKeys: (rowKeys: string[] | number[]) => void;
@@ -56,7 +31,52 @@
 
   const templatesFormRef = ref<{
     setTemplates: (templates: TemplateEntity[]) => void;
+    getTemplates: () => TemplateEntity[];
   } | null>(null);
+
+  const isUpdate = ref(true);
+  const getTitle = computed(() => (!unref(isUpdate) ? '新增代码模板组' : '编辑代码模板组'));
+  const id = ref('');
+  const activeKey = ref('basic');
+
+  const [registerModal, { setModalProps, closeModal }] = useModalInner(
+    async (data: CodeTemplateGroupEntity) => {
+      setModalProps({ confirmLoading: false, defaultFullscreen: true, canFullscreen: false });
+      activeKey.value = 'basic';
+      isUpdate.value = !!data?.id;
+
+      if (unref(isUpdate)) {
+        id.value = data.id!;
+      }
+
+      resetFields();
+      setFieldsValue({ ...data });
+      domainConverterFormRef.value?.setSelectedRowKeys([data.domainConverterId]);
+      propertyTableRef.value?.setTableData(data.properties || []);
+      templatesFormRef.value?.setTemplates(data.templates || []);
+    },
+  );
+
+  const emit = defineEmits(['success', 'register']);
+
+  async function handleSubmit() {
+    const basic = await validate();
+    const entity: CodeTemplateGroupEntity = {
+      id: id.value,
+      ...basic,
+      domainConverterId: domainConverterFormRef.value?.getSelectRowKeys()[0],
+      properties: propertyTableRef.value?.getDataSource(),
+      templates: templatesFormRef.value?.getTemplates(),
+    };
+    console.log('基础参数', basic);
+    console.log('领域转换器', domainConverterFormRef.value?.getSelectRowKeys());
+    console.log('全局参数', propertyTableRef.value?.getDataSource());
+    console.log('代码模板', templatesFormRef.value?.getTemplates());
+    console.log('结果', entity);
+    entity.id ? updateCodeTemplateGroupById(entity.id, entity) : addCodeTemplateGroup(entity);
+    closeModal();
+    emit('success');
+  }
 </script>
 
 <template>

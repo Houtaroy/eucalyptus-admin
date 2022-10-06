@@ -6,12 +6,16 @@
 
   import CodeTemplateGroupModal from './CodeTemplateGroupModal.vue';
 
-  import { listCodeTemplateGroups, loadCodeTemplateGroupById } from '/@/apis/code-template-group';
+  import {
+    listCodeTemplateGroups,
+    loadCodeTemplateGroupById,
+    deleteCodeTemplateGroupById,
+  } from '/@/apis/code-template-group';
   import { CodeTemplateGroupEntity } from '/@/apis/code-template-group/models/CodeTemplateGroupEntity';
 
   const [registerModal, { openModal }] = useModal();
 
-  const [register] = useTable({
+  const [register, { reload }] = useTable({
     rowKey: 'id',
     columns: [
       {
@@ -45,7 +49,12 @@
     closeFullLoading();
     openModal(true, data);
   }
-  function handleDelete() {}
+  function handleDelete(record: CodeTemplateGroupEntity) {
+    if (record.id) {
+      deleteCodeTemplateGroupById(record.id);
+      reload();
+    }
+  }
 </script>
 <template>
   <page-wrapper dense contentFullHeight fixedHeight contentClass="flex">
@@ -76,6 +85,6 @@
         </a-button>
       </template>
     </basic-table>
-    <code-template-group-modal @register="registerModal" />
+    <code-template-group-modal @register="registerModal" @success="reload" />
   </page-wrapper>
 </template>

@@ -3,20 +3,32 @@
 
   import { Row as ARow, Col as ACol } from 'ant-design-vue';
 
+  import { CodeEditor, MODE } from '/@/components/CodeEditor';
   import { BasicFileTree, File } from '/@/components/FileTree';
 
   import { TemplateEntity } from '/@/apis/code-template-group/models/TemplateEntity';
 
   const treeRef = ref<{
     setFiles: (files: File[]) => void;
+    getFiles: () => File[];
   } | null>(null);
 
-  function handleSelect(keys: string[] | number[], item: File) {
-    console.log('选择了', keys);
-    console.log('选择了', item);
+  const current = ref<File | null>(null);
+
+  const modes = new Map<string, MODE>();
+  modes.set('java', MODE.JAVA);
+  modes.set('xml', MODE.XML);
+
+  function getCodeEditorMode(file: File): MODE {
+    return modes.get(file.name.substring(file.name.lastIndexOf('.') + 1)) || MODE.HTML;
+  }
+
+  function handleSelect(file: File) {
+    current.value = file;
   }
 
   function setTemplates(templates: TemplateEntity[]) {
+    current.value = null;
     treeRef.value?.setFiles(
       templates.map((template) => ({
         ...template,
@@ -25,8 +37,22 @@
     );
   }
 
+  function getTemplates(): TemplateEntity[] {
+    const result: TemplateEntity[] = [];
+    if (treeRef.value) {
+      treeRef.value.getFiles().forEach((file) => {
+        result.push({
+          name: file.name,
+          content: file.content,
+        });
+      });
+    }
+    return result;
+  }
+
   defineExpose({
     setTemplates,
+    getTemplates,
   });
 </script>
 
@@ -35,6 +61,12 @@
     <a-col :span="8">
       <basic-file-tree ref="treeRef" title="模板列表" @select="handleSelect" />
     </a-col>
-    <a-col :span="16"> 代码编辑器 </a-col>
+    <a-col :span="16">
+      <code-editor
+        v-if="current && !current.isDirectory"
+        v-model:value="current.content"
+        :mode="getCodeEditorMode(current)"
+      />
+    </a-col>
   </a-row>
 </template>
