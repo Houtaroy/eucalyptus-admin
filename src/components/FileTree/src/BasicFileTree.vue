@@ -45,6 +45,8 @@
 
   setFiles(props.files || []);
 
+  const expandedKeys = ref<string[] | number[]>(['_root']);
+
   const current = ref<FileTreeItem | null>(null);
 
   const emit = defineEmits(['select']);
@@ -98,7 +100,12 @@
   });
 </script>
 <template>
-  <tree :tree-data="treeDataRef" @select="handleSelected" @contextmenu.prevent>
+  <tree
+    :tree-data="treeDataRef"
+    :expanded-keys="expandedKeys"
+    @select="handleSelected"
+    @contextmenu.prevent
+  >
     <template #title="{ key: nodeKey, name, isDirectory, isRoot }">
       <dropdown :trigger="['contextmenu']">
         <a-input

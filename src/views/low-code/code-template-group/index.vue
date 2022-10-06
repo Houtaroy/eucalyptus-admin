@@ -49,9 +49,9 @@
     closeFullLoading();
     openModal(true, data);
   }
-  function handleDelete(record: CodeTemplateGroupEntity) {
+  async function handleDelete(record: CodeTemplateGroupEntity) {
     if (record.id) {
-      deleteCodeTemplateGroupById(record.id);
+      await deleteCodeTemplateGroupById(record.id);
       reload();
     }
   }

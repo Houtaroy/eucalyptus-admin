@@ -7,33 +7,22 @@
 
   import { listDomainConverters } from '/@/apis/domain-converter';
 
-  function handleChange(selectedRowKeys: string[] | number[], selectedRow: DomainConverter[]) {
-    if (selectedRowKeys.length > 0 && selectedRow.length > 0) {
-      setPropertyTableData(selectedRow[0].properties ?? []);
-    } else {
-      setPropertyTableData([]);
-    }
-  }
-  const [converterRegister, { getSelectRowKeys, setSelectedRowKeys }] = useTable({
-    rowKey: 'id',
-    columns: [
-      {
-        title: '名称',
-        dataIndex: 'name',
+  const [converterRegister, { getSelectRows, getSelectRowKeys, setSelectedRowKeys, reload }] =
+    useTable({
+      rowKey: 'id',
+      columns: [
+        {
+          title: '名称',
+          dataIndex: 'name',
+        },
+      ],
+      pagination: false,
+      api: listDomainConverters,
+      rowSelection: {
+        type: 'radio',
+        onChange: handleChange,
       },
-    ],
-    pagination: false,
-    api: listDomainConverters,
-    afterFetch: (data: DomainConverter[]) => {
-      const selectedRowKeys = getSelectRowKeys();
-      const index = data.findIndex((converter) => converter.id === selectedRowKeys[0]);
-      setPropertyTableData(data[index].properties ?? []);
-    },
-    rowSelection: {
-      type: 'radio',
-      onChange: handleChange,
-    },
-  });
+    });
 
   const [propertyRegister, { setTableData: setPropertyTableData }] = useTable({
     rowKey: 'name',
@@ -58,9 +47,27 @@
     pagination: false,
   });
 
+  function getSelectedId(): string | undefined {
+    return getSelectRowKeys()[0];
+  }
+
+  function setSelectedId(id?: string) {
+    setSelectedRowKeys(id ? [id] : []);
+    setPropertyTableData(id ? getSelectRows()[0].properties : []);
+  }
+
+  function handleChange(selectedRowKeys: string[] | number[], selectedRow: DomainConverter[]) {
+    if (selectedRowKeys.length > 0 && selectedRow.length > 0) {
+      setPropertyTableData(selectedRow[0].properties ?? []);
+    } else {
+      setPropertyTableData([]);
+    }
+  }
+
   defineExpose({
-    setSelectedRowKeys,
-    getSelectRowKeys,
+    reload,
+    setSelectedId,
+    getSelectedId,
   });
 </script>
 

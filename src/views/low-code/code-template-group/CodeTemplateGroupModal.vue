@@ -1,10 +1,11 @@
 <script lang="ts" setup>
   import { ref, unref, computed } from 'vue';
 
-  import { Tabs, TabPane } from 'ant-design-vue';
+  import { Tabs, TabPane, message } from 'ant-design-vue';
 
   import { BasicModal, useModalInner } from '/@/components/Modal';
   import { BasicForm } from '/@/components/Form';
+  import { FetchParams } from '/@/components/Table';
 
   import { useCodeTemplateGroupBasicForm } from './CodeTemplateGroupBasicForm';
   import CodeTemplateGroupDomainConverterForm from './CodeTemplateGroupDomainConverterForm.vue';
@@ -20,8 +21,9 @@
     useCodeTemplateGroupBasicForm();
 
   const domainConverterFormRef = ref<{
-    setSelectedRowKeys: (rowKeys: string[] | number[]) => void;
-    getSelectRowKeys: () => string[];
+    reload: (opt?: FetchParams) => Promise<void>;
+    getSelectedId: () => string | undefined;
+    setSelectedId: (id?: string) => void;
   } | null>(null);
 
   const propertyTableRef = ref<{
@@ -36,7 +38,7 @@
 
   const isUpdate = ref(true);
   const getTitle = computed(() => (!unref(isUpdate) ? '新增代码模板组' : '编辑代码模板组'));
-  const id = ref('');
+  const id = ref<string | undefined>();
   const activeKey = ref('basic');
 
   const [registerModal, { setModalProps, closeModal }] = useModalInner(
@@ -51,7 +53,8 @@
 
       resetFields();
       setFieldsValue({ ...data });
-      domainConverterFormRef.value?.setSelectedRowKeys([data.domainConverterId]);
+      await domainConverterFormRef.value?.reload();
+      domainConverterFormRef.value?.setSelectedId(data.domainConverterId);
       propertyTableRef.value?.setTableData(data.properties || []);
       templatesFormRef.value?.setTemplates(data.templates || []);
     },
@@ -61,19 +64,26 @@
 
   async function handleSubmit() {
     const basic = await validate();
+    const domainConverterId = domainConverterFormRef.value?.getSelectedId();
+    if (!domainConverterId) {
+      message.error('请选择领域转换器');
+      return;
+    }
+    const templates = templatesFormRef.value?.getTemplates();
+    if (!templates || templates?.length <= 0) {
+      message.error('请至少创建一个模板文件');
+      return;
+    }
     const entity: CodeTemplateGroupEntity = {
       id: id.value,
       ...basic,
-      domainConverterId: domainConverterFormRef.value?.getSelectRowKeys()[0],
+      domainConverterId,
       properties: propertyTableRef.value?.getDataSource(),
       templates: templatesFormRef.value?.getTemplates(),
     };
-    console.log('基础参数', basic);
-    console.log('领域转换器', domainConverterFormRef.value?.getSelectRowKeys());
-    console.log('全局参数', propertyTableRef.value?.getDataSource());
-    console.log('代码模板', templatesFormRef.value?.getTemplates());
-    console.log('结果', entity);
-    entity.id ? updateCodeTemplateGroupById(entity.id, entity) : addCodeTemplateGroup(entity);
+    entity.id
+      ? await updateCodeTemplateGroupById(entity.id, entity)
+      : await addCodeTemplateGroup(entity);
     closeModal();
     emit('success');
   }
