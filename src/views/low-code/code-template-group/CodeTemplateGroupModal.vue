@@ -17,6 +17,25 @@
 
   import { addCodeTemplateGroup, updateCodeTemplateGroupById } from '/@/apis/code-template-group';
 
+  const [registerModal, { setModalProps, closeModal }] = useModalInner(
+    async (data: CodeTemplateGroupEntity) => {
+      setModalProps({ confirmLoading: false, defaultFullscreen: true, canFullscreen: false });
+      activeKey.value = 'basic';
+      isUpdate.value = !!data?.id;
+
+      if (unref(isUpdate)) {
+        id.value = data.id!;
+      }
+
+      resetFields();
+      setFieldsValue({ ...data });
+      await domainConverterFormRef.value?.reload();
+      domainConverterFormRef.value?.setSelectedId(data.domainConverterId);
+      propertyTableRef.value?.setTableData(data.properties || []);
+      templatesFormRef.value?.setTemplates(data.templates || []);
+    },
+  );
+
   const [basicFormRegister, { setFieldsValue, resetFields, validate }] =
     useCodeTemplateGroupBasicForm();
 
@@ -40,25 +59,6 @@
   const getTitle = computed(() => (!unref(isUpdate) ? '新增代码模板组' : '编辑代码模板组'));
   const id = ref<string | undefined>();
   const activeKey = ref('basic');
-
-  const [registerModal, { setModalProps, closeModal }] = useModalInner(
-    async (data: CodeTemplateGroupEntity) => {
-      setModalProps({ confirmLoading: false, defaultFullscreen: true, canFullscreen: false });
-      activeKey.value = 'basic';
-      isUpdate.value = !!data?.id;
-
-      if (unref(isUpdate)) {
-        id.value = data.id!;
-      }
-
-      resetFields();
-      setFieldsValue({ ...data });
-      await domainConverterFormRef.value?.reload();
-      domainConverterFormRef.value?.setSelectedId(data.domainConverterId);
-      propertyTableRef.value?.setTableData(data.properties || []);
-      templatesFormRef.value?.setTemplates(data.templates || []);
-    },
-  );
 
   const emit = defineEmits(['success', 'register']);
 
