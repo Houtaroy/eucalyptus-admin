@@ -11,8 +11,17 @@
     </div>
     <div class="mt-5">
       <generator-database-form v-show="current === 0" @next="handleDatabase" />
-      <generator-tables-form v-show="current === 1" @next="handleTables" />
-      <generator-code-template-group-form v-show="current === 2" @next="handleCodeTemplateGroup" />
+      <generator-tables-form
+        ref="tablesFormRef"
+        v-show="current === 1"
+        @next="handleTables"
+        @prev="handlePrev"
+      />
+      <generator-code-template-group-form
+        v-show="current === 2"
+        @prev="handlePrev"
+        @next="handleCodeTemplateGroup"
+      />
       <generator-properties-form v-show="current === 3" @next="handleProperties" />
       <generator-result v-show="current === 4" />
     </div>
@@ -33,25 +42,39 @@
 
   import { TablesRequest } from '/@/apis/databases/models/TablesRequest';
   import { JdbcTable } from '/@/apis/databases/models/JdbcTable';
+  import { CodeTemplateGroupEntity } from '/@/apis/code-template-group/models/CodeTemplateGroupEntity';
 
-  import { listTables } from '/@/apis/databases/index';
+  import { listTables } from '/@/apis/databases';
+  import { loadCodeTemplateGroupById } from '/@/apis/code-template-group';
+
+  const tablesFormRef = ref<{
+    setTableData: <T = Recordable>(values: T[]) => void;
+  } | null>(null);
 
   const current = ref(0);
   const tablesRequest = ref<TablesRequest>({});
   const tables = ref<JdbcTable[]>([]);
+  const codeTemplateGroup = ref<CodeTemplateGroupEntity | null>(null);
+
+  function handlePrev() {
+    current.value--;
+  }
 
   async function handleDatabase(data: TablesRequest) {
     tablesRequest.value = data;
     tables.value = await listTables(data);
+    tablesFormRef.value?.setTableData(tables.value);
     current.value++;
   }
 
-  async function handleTables(tablse) {
-    console.log(tablse);
+  async function handleTables(data: JdbcTable[]) {
+    tables.value = data;
+    current.value++;
   }
 
-  async function handleCodeTemplateGroup(codeTemplateGroup) {
-    console.log(codeTemplateGroup);
+  async function handleCodeTemplateGroup(id: string) {
+    codeTemplateGroup.value = await loadCodeTemplateGroupById(id);
+    current.value++;
   }
 
   async function handleProperties(properties) {
