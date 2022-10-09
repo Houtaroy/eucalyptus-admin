@@ -22,7 +22,12 @@
         @prev="handlePrev"
         @next="handleCodeTemplateGroup"
       />
-      <generator-properties-form v-show="current === 3" @next="handleProperties" />
+      <generator-properties-form
+        ref="propertiesFormRef"
+        v-show="current === 3"
+        @prev="handlePrev"
+        @next="handleProperties"
+      />
       <generator-result v-show="current === 4" />
     </div>
   </page-wrapper>
@@ -42,6 +47,7 @@
 
   import { TablesRequest } from '/@/apis/databases/models/TablesRequest';
   import { JdbcTable } from '/@/apis/databases/models/JdbcTable';
+  import { PropertyEntity } from '/@/apis/code-template-group/models/PropertyEntity';
   import { CodeTemplateGroupEntity } from '/@/apis/code-template-group/models/CodeTemplateGroupEntity';
 
   import { listTables } from '/@/apis/databases';
@@ -50,11 +56,15 @@
   const tablesFormRef = ref<{
     setTableData: <T = Recordable>(values: T[]) => void;
   } | null>(null);
+  const propertiesFormRef = ref<{
+    setSchemas: (properties: PropertyEntity[]) => void;
+  } | null>(null);
 
   const current = ref(0);
   const tablesRequest = ref<TablesRequest>({});
   const tables = ref<JdbcTable[]>([]);
   const codeTemplateGroup = ref<CodeTemplateGroupEntity | null>(null);
+  const properties = ref<{ [key: string]: any }>({});
 
   function handlePrev() {
     current.value--;
@@ -74,11 +84,13 @@
 
   async function handleCodeTemplateGroup(id: string) {
     codeTemplateGroup.value = await loadCodeTemplateGroupById(id);
+    propertiesFormRef.value?.setSchemas(codeTemplateGroup.value.properties);
     current.value++;
   }
 
-  async function handleProperties(properties) {
-    console.log(properties);
+  async function handleProperties(data: { [key: string]: any }) {
+    properties.value = data;
+    console.log('参数', properties.value);
   }
 </script>
 <style lang="less" scoped>
