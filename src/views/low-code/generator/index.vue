@@ -10,28 +10,40 @@
       </steps>
     </div>
     <div class="mt-5">
-      <generator-database-form v-if="current === 0" @next="handleDatabase" />
-      <generator-tables-form v-if="current === 1" @next="handleTables" />
-      <generator-code-template-group-form v-if="current === 2" @next="handleCodeTemplateGroup" />
-      <generator-properties-form v-if="current === 3" @next="handleProperties" />
-      <generator-result v-if="current === 4" />
+      <generator-database-form v-show="current === 0" @next="handleDatabase" />
+      <generator-tables-form v-show="current === 1" @next="handleTables" />
+      <generator-code-template-group-form v-show="current === 2" @next="handleCodeTemplateGroup" />
+      <generator-properties-form v-show="current === 3" @next="handleProperties" />
+      <generator-result v-show="current === 4" />
     </div>
   </page-wrapper>
 </template>
 <script setup lang="ts" name="LowCodeGenerator">
   import { ref } from 'vue';
-  import { PageWrapper } from '/@/components/Page';
+
   import { Steps, Step } from 'ant-design-vue';
+
+  import { PageWrapper } from '/@/components/Page';
+
   import GeneratorDatabaseForm from './GeneratorDatabaseForm.vue';
   import GeneratorTablesForm from './GeneratorTablesForm.vue';
   import GeneratorCodeTemplateGroupForm from './GeneratorCodeTemplateGroupForm.vue';
   import GeneratorPropertiesForm from './GeneratorPropertiesForm.vue';
   import GeneratorResult from './GeneratorResult.vue';
 
-  const current = ref(0);
+  import { TablesRequest } from '/@/apis/databases/models/TablesRequest';
+  import { JdbcTable } from '/@/apis/databases/models/JdbcTable';
 
-  async function handleDatabase(database) {
-    console.log(database);
+  import { listTables } from '/@/apis/databases/index';
+
+  const current = ref(0);
+  const tablesRequest = ref<TablesRequest>({});
+  const tables = ref<JdbcTable[]>([]);
+
+  async function handleDatabase(data: TablesRequest) {
+    tablesRequest.value = data;
+    tables.value = await listTables(data);
+    current.value++;
   }
 
   async function handleTables(tablse) {
