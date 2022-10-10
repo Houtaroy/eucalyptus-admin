@@ -113,7 +113,7 @@
     resultRef.value?.setPreview(
       await generatePreview(codeTemplateGroup.value.id, {
         tables: tables.value,
-        globalOptions: properties,
+        globalOptions: properties.value,
       }),
     );
     current.value++;
