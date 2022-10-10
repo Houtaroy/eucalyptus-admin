@@ -3,7 +3,7 @@
 
   import { Row as ARow, Col as ACol } from 'ant-design-vue';
 
-  import { CodeEditor, MODE } from '/@/components/CodeEditor';
+  import { CodeEditor, getCodeEditorMode } from '/@/components/CodeEditor';
   import { BasicFileTree, File } from '/@/components/FileTree';
 
   import { TemplateEntity } from '/@/apis/code-template-group/models/TemplateEntity';
@@ -14,14 +14,6 @@
   } | null>(null);
 
   const current = ref<File | null>(null);
-
-  const modes = new Map<string, MODE>();
-  modes.set('java', MODE.JAVA);
-  modes.set('xml', MODE.XML);
-
-  function getCodeEditorMode(file: File): MODE {
-    return modes.get(file.name.substring(file.name.lastIndexOf('.') + 1)) || MODE.HTML;
-  }
 
   function handleSelect(file: File) {
     current.value = file;
@@ -65,7 +57,7 @@
       <code-editor
         v-if="current && !current.isDirectory"
         v-model:value="current.content"
-        :mode="getCodeEditorMode(current)"
+        :mode="getCodeEditorMode(current.name)"
       />
     </a-col>
   </a-row>

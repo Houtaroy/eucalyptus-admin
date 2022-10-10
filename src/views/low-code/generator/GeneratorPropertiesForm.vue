@@ -9,7 +9,7 @@
 
   const schemas = ref<FormSchema[]>();
 
-  const [register, { validate }] = useForm({
+  const [register, { validate, setFieldsValue }] = useForm({
     labelWidth: 100,
     actionColOptions: {
       span: 14,
@@ -40,6 +40,7 @@
 
   defineExpose({
     setSchemas,
+    setFieldsValue,
   });
 </script>
 <template>

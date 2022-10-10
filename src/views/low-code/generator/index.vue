@@ -28,7 +28,12 @@
         @prev="handlePrev"
         @next="handleProperties"
       />
-      <generator-result v-show="current === 4" />
+      <generator-result
+        ref="resultRef"
+        v-show="current === 4"
+        @prev="handlePrev"
+        @download="handleDownload"
+      />
     </div>
   </page-wrapper>
 </template>
@@ -49,15 +54,24 @@
   import { JdbcTable } from '/@/apis/databases/models/JdbcTable';
   import { PropertyEntity } from '/@/apis/code-template-group/models/PropertyEntity';
   import { CodeTemplateGroupEntity } from '/@/apis/code-template-group/models/CodeTemplateGroupEntity';
+  import { GeneratePreview } from '/@/apis/code-template-group/models/GeneratePreview';
 
   import { listTables } from '/@/apis/databases';
-  import { loadCodeTemplateGroupById } from '/@/apis/code-template-group';
+  import {
+    loadCodeTemplateGroupById,
+    generatePreview,
+    generateDownload,
+  } from '/@/apis/code-template-group';
 
   const tablesFormRef = ref<{
     setTableData: <T = Recordable>(values: T[]) => void;
   } | null>(null);
   const propertiesFormRef = ref<{
     setSchemas: (properties: PropertyEntity[]) => void;
+    setFieldsValue: <T>(values: T) => Promise<void>;
+  } | null>(null);
+  const resultRef = ref<{
+    setPreview: (preview: GeneratePreview) => void;
   } | null>(null);
 
   const current = ref(0);
@@ -85,12 +99,37 @@
   async function handleCodeTemplateGroup(id: string) {
     codeTemplateGroup.value = await loadCodeTemplateGroupById(id);
     propertiesFormRef.value?.setSchemas(codeTemplateGroup.value.properties);
+    if (properties.value) {
+      propertiesFormRef.value?.setFieldsValue(properties.value);
+    }
     current.value++;
   }
 
   async function handleProperties(data: { [key: string]: any }) {
     properties.value = data;
-    console.log('参数', properties.value);
+    if (!codeTemplateGroup.value?.id) {
+      return;
+    }
+    resultRef.value?.setPreview(
+      await generatePreview(codeTemplateGroup.value.id, {
+        tables: tables.value,
+        globalOptions: properties,
+      }),
+    );
+    current.value++;
+  }
+
+  async function handleDownload() {
+    if (!codeTemplateGroup.value?.id) {
+      return;
+    }
+    window.open(
+      '/generator-results/' +
+        (await generateDownload(codeTemplateGroup.value.id, {
+          tables: tables.value,
+          globalOptions: properties.value,
+        })),
+    );
   }
 </script>
 <style lang="less" scoped>
