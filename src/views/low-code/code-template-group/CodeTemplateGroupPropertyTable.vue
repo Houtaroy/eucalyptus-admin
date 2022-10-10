@@ -1,4 +1,6 @@
 <script lang="ts" setup>
+  import { uniqueId } from 'lodash-es';
+
   import {
     BasicTable,
     TableAction,
@@ -8,8 +10,9 @@
     useTable,
   } from '/@/components/Table';
 
-  const [registerTable, { getDataSource, setTableData }] = useTable({
-    rowKey: 'code',
+  import { PropertyEntity } from '/@/apis/code-template-group/models/PropertyEntity';
+
+  const [register, { getDataSource, setTableData }] = useTable({
     columns: [
       {
         title: '名称',
@@ -127,14 +130,36 @@
     ];
   }
 
+  function setProperties(properties: PropertyEntity[]) {
+    setTableData(
+      properties.map((property) => {
+        return {
+          ...property,
+          key: uniqueId('property-'),
+        };
+      }),
+    );
+  }
+
+  function getProperties(): PropertyEntity[] {
+    return getDataSource().map((data) => {
+      return {
+        name: data.name,
+        code: data.code,
+        type: data.type,
+        description: data.description,
+      };
+    });
+  }
+
   defineExpose({
-    setTableData,
-    getDataSource,
+    setProperties,
+    getProperties,
   });
 </script>
 <template>
   <div>
-    <BasicTable @register="registerTable">
+    <BasicTable @register="register">
       <template #action="{ record, column }">
         <TableAction :actions="createActions(record, column)" />
       </template>

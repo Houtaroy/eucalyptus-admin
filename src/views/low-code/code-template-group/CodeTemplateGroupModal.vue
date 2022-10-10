@@ -13,9 +13,34 @@
   import CodeTemplateGroupTemplatesForm from './CodeTemplateGroupTemplatesForm.vue';
 
   import { CodeTemplateGroupEntity } from '/@/apis/code-template-group/models/CodeTemplateGroupEntity';
+  import { PropertyEntity } from '/@/apis/code-template-group/models/PropertyEntity';
   import { TemplateEntity } from '/@/apis/code-template-group/models/TemplateEntity';
 
   import { addCodeTemplateGroup, updateCodeTemplateGroupById } from '/@/apis/code-template-group';
+
+  const [basicFormRegister, { setFieldsValue, resetFields, validate }] =
+    useCodeTemplateGroupBasicForm();
+
+  const domainConverterFormRef = ref<{
+    reload: (opt?: FetchParams) => Promise<void>;
+    getSelectedId: () => string | undefined;
+    setSelectedId: (id?: string) => void;
+  } | null>(null);
+
+  const propertyTableRef = ref<{
+    getProperties: () => PropertyEntity[];
+    setProperties: (properties: PropertyEntity[]) => void;
+  } | null>(null);
+
+  const templatesFormRef = ref<{
+    setTemplates: (templates: TemplateEntity[]) => void;
+    getTemplates: () => TemplateEntity[];
+  } | null>(null);
+
+  const isUpdate = ref(true);
+  const getTitle = computed(() => (!unref(isUpdate) ? '新增代码模板组' : '编辑代码模板组'));
+  const id = ref<string | undefined>();
+  const activeKey = ref('basic');
 
   const [registerModal, { setModalProps, closeModal }] = useModalInner(
     async (data: CodeTemplateGroupEntity) => {
@@ -31,34 +56,10 @@
       setFieldsValue({ ...data });
       await domainConverterFormRef.value?.reload();
       domainConverterFormRef.value?.setSelectedId(data.domainConverterId);
-      propertyTableRef.value?.setTableData(data.properties || []);
+      propertyTableRef.value?.setProperties(data.properties || []);
       templatesFormRef.value?.setTemplates(data.templates || []);
     },
   );
-
-  const [basicFormRegister, { setFieldsValue, resetFields, validate }] =
-    useCodeTemplateGroupBasicForm();
-
-  const domainConverterFormRef = ref<{
-    reload: (opt?: FetchParams) => Promise<void>;
-    getSelectedId: () => string | undefined;
-    setSelectedId: (id?: string) => void;
-  } | null>(null);
-
-  const propertyTableRef = ref<{
-    getDataSource: <T = Recordable>() => T[];
-    setTableData: <T = Recordable>(values: T[]) => void;
-  } | null>(null);
-
-  const templatesFormRef = ref<{
-    setTemplates: (templates: TemplateEntity[]) => void;
-    getTemplates: () => TemplateEntity[];
-  } | null>(null);
-
-  const isUpdate = ref(true);
-  const getTitle = computed(() => (!unref(isUpdate) ? '新增代码模板组' : '编辑代码模板组'));
-  const id = ref<string | undefined>();
-  const activeKey = ref('basic');
 
   const emit = defineEmits(['success', 'register']);
 
@@ -78,7 +79,7 @@
       id: id.value,
       ...basic,
       domainConverterId,
-      properties: propertyTableRef.value?.getDataSource(),
+      properties: propertyTableRef.value?.getProperties(),
       templates: templatesFormRef.value?.getTemplates(),
     };
     entity.id
