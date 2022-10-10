@@ -15,7 +15,7 @@
         component: 'Input',
         label: 'JDBC链接地址',
         required: true,
-        defaultValue: 'jdbc:mysql://bj-cdb-9amt73r4.sql.tencentcdb.com:59997/eucalyptus',
+        defaultValue: 'jdbc:mysql://bj-cdb-9amt73r4.sql.tencentcdb.com:59997/eucalyptus_test',
         colProps: {
           span: 24,
         },
@@ -25,7 +25,7 @@
         component: 'Input',
         label: '用户名',
         required: true,
-        defaultValue: 'test',
+        defaultValue: 'visitor',
         colProps: {
           span: 24,
         },
@@ -35,7 +35,7 @@
         component: 'Input',
         label: '密码',
         required: true,
-        defaultValue: 'test@5015021301',
+        defaultValue: 'visitor@123',
         colProps: {
           span: 24,
         },
@@ -45,7 +45,7 @@
         component: 'Input',
         label: '数据库名称',
         required: true,
-        defaultValue: 'eucalyptus',
+        defaultValue: 'eucalyptus_test',
         colProps: {
           span: 24,
         },
