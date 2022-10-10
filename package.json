@@ -1,10 +1,10 @@
 {
-  "name": "vben-admin",
-  "version": "2.8.0",
+  "name": "eucalyptus-admin",
+  "version": "0.1.0",
   "author": {
-    "name": "vben",
-    "email": "anncwb@126.com",
-    "url": "https://github.com/anncwb"
+    "name": "koala",
+    "email": "koala_projects@yeah.net",
+    "url": "https://github.com/koala-projects"
   },
   "scripts": {
     "commit": "czg",
@@ -152,13 +152,13 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/anncwb/vue-vben-admin.git"
+    "url": "git+https://github.com/koala-projects/eucalyptus-admin.git"
   },
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/anncwb/vue-vben-admin/issues"
+    "url": "https://github.com/koala-projects/eucalyptus-admin/issues"
   },
-  "homepage": "https://github.com/anncwb/vue-vben-admin",
+  "homepage": "https://github.com/koala-projects/eucalyptus-admin",
   "engines": {
     "node": "^12 || >=14"
   },
